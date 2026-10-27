@@ -36,7 +36,7 @@
 
 ### **1. Clone the Repository**
 
-git clone [https://github.com/usamahere49/url-shortener.git](https://github.com/usamahere49/url-shortener.git)
+git clone [https://github.com/usama-49/shortify.git](https://github.com/usamahere49/url-shortener.git)
 cd url-shortener
 
 ### **2. Backend Setup**
