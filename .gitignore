@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+/.pnpm
+/.yarn
+
+# Build Outputs
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# Environment Variables (Crucial!)
+.env
+.env.*
+!.env.example
+
+# Deployment & Caches
+.vercel
+.turbo
+
+# Operating System & IDE Files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs & Temporary Files
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+uploads/
+tmp/
