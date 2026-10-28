@@ -4,7 +4,7 @@ export interface IUrl {
   fullUrl: string;
   shortUrl: string;
   clicks: number;
-  user: mongoose.Types.ObjectId;
+  user?: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -28,6 +28,7 @@ const urlSchema = new Schema<IUrl>(
     user: {
       type: Schema.Types.ObjectId,
       ref: "User",
+      default: null,
     },
   },
   { timestamps: true },

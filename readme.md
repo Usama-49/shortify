@@ -44,12 +44,7 @@ cd shortify
 cd backend
 npm install
 
-Create a `.env` file in the `backend/` root directory:
-PORT=5000
-MONGO_URI=your_mongodb_connection_string
-
-Run the development server with live reload:
-npm run dev
+You will find `.env.example` files in both frontend & backend; Just rename them to `.env`, enter your credentials & you're ready to go!
 
 ---
 
@@ -58,11 +53,11 @@ npm run dev
 - [x] TypeScript Express Backend Setup
 - [x] Graceful Process Shutdown & Custom DNS Handlers
 - [x] MongoDB Connection Lifecycle Management
-- [ ] URL Shortener Schema & Controller Logic
-- [ ] Custom Short Code & Expiration Handling
-- [ ] Next.js Frontend Integration & Dashboard
-- [ ] NextAuth Authentication (Google & GitHub)
 - [ ] Click Analytics Tracking & Visual Charts
+- [ ] URL Shortener Schema & Controller Logic
+- [ ] Global Error Handeling in Backend
+- [ ] Custom Short Code & Expiration Handling
+- [ ] Frontend Integration & Dashboard
 
 ---
 
