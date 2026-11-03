@@ -1,38 +1,31 @@
 import type { NextFunction, Request, Response } from "express";
 import { urlModel } from "../models/shorturl.model.js";
 import { getNanoId } from "../utils/getNanoId.js";
+import { generateShortUrl } from "../utils/generateShortUrl.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
-export const createShortUrl = async (req: Request, res: Response, next: NextFunction) => {
-  try {
+export const createShortUrl = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
     const { url } = req.body;
     if (!url) {
-      return next({ status: 400, message: "url missing!" });
+      throw { status: 400, message: "url missing!" };
     }
-    const shortUrl = getNanoId(8);
-    const newUrl = new urlModel({
-      fullUrl: url,
-      shortUrl,
-    });
-    await newUrl.save();
-    const appUrl = process.env.APP_URL;
+    const newUrl = await generateShortUrl(url);
+    const appUrl = process.env.APP_URL!.replace(/\/$/, "");
     res.status(201).json({
       message: "Short url created!",
-      url: appUrl + "redirect/" + newUrl.shortUrl,
+      url: `${appUrl}/redirect/${newUrl.shortUrl}`,
     });
-  } catch (err) {
-    next(err);
-  }
-};
+  },
+);
 
-export const redirectToUrl = async (req: Request, res: Response, next: NextFunction) => {
-  try {
+export const redirectToUrl = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
     const url = await urlModel.findOneAndUpdate({ shortUrl: id }, { $inc: { clicks: 1 } });
     if (!url) {
-      return next({ status: 400, message: "Invalid short url!" });
+      throw { status: 404, message: "Short URL not found!" };
     }
     res.redirect(url.fullUrl);
-  } catch (err) {
-    next(err);
-  }
-};
+  },
+);
