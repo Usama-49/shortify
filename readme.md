@@ -55,11 +55,11 @@ You will find `.env.example` files in both frontend & backend; Just rename them 
 - [x] TypeScript Express Backend Setup
 - [x] Graceful Process Shutdown & Custom DNS Handlers
 - [x] MongoDB Connection Lifecycle Management
+- [x] URL Shortener Schema & Controller Logic
+- [x] Global Error Handeling in Backend
+- [ ] Frontend Integration & Dashboard (Partially done)
 - [ ] Click Analytics Tracking & Visual Charts
-- [ ] URL Shortener Schema & Controller Logic
-- [ ] Global Error Handeling in Backend
 - [ ] Custom Short Code & Expiration Handling
-- [ ] Frontend Integration & Dashboard
 
 ---
 
@@ -69,4 +69,4 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
 
-Developed with ❤️ by **Usama**
+Developed with ❤️ by **[Usama](https://github.com/usama-49)**
