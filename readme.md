@@ -24,6 +24,8 @@
 - **Framework:** React
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS
+- **State Management:** TanStack Query
+- **HTTP Client:** Axios
 
 ---
 

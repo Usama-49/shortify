@@ -11,10 +11,15 @@ export const createShortUrl = asyncHandler(
       throw { status: 400, message: "url missing!" };
     }
     const newUrl = await generateShortUrl(url);
-    const appUrl = process.env.APP_URL!.replace(/\/$/, "");
+
+    //changed: Added fallback to default origin if process.env.APP_URL is not set
+    const baseUrl = (process.env.APP_URL || "http://localhost:5000").replace(/\/$/, "");
+
     res.status(201).json({
+      success: true,
       message: "Short url created!",
-      url: `${appUrl}/redirect/${newUrl.shortUrl}`,
+      //changed: Simplified response structure to use generated shortUrl field safely
+      shortUrl: `${baseUrl}/redirect/${newUrl.shortUrl}`,
     });
   },
 );

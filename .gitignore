@@ -1,26 +1,29 @@
 # Dependencies
 node_modules/
-/.pnpm
-/.yarn
+.pnpm
+.yarn
 
-# Build Outputs
+# Build & Vite Outputs
 dist/
+dist-ssr/
 build/
 .next/
 out/
+.vite/
 *.tsbuildinfo
 next-env.d.ts
 
-# Environment Variables (Crucial!)
+# Environment Variables
 .env
 .env.*
 !.env.example
+*.local
 
 # Deployment & Caches
 .vercel
 .turbo
 
-# Operating System & IDE Files
+# OS & IDE Files
 .DS_Store
 Thumbs.db
 .vscode/
@@ -28,7 +31,7 @@ Thumbs.db
 *.swp
 *.swo
 
-# Logs & Temporary Files
+# Logs & Temp Files
 *.log
 npm-debug.log*
 yarn-debug.log*
