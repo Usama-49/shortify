@@ -1,36 +1,44 @@
 import type { NextFunction, Request, Response } from "express";
 import { urlModel } from "../models/shorturl.model.js";
-import { getNanoId } from "../utils/getNanoId.js";
 import { generateShortUrl } from "../utils/generateShortUrl.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { AuthenticatedRequest } from "../middlewares/auth.middleware.js";
 
 export const createShortUrl = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     const { url } = req.body;
-    if (!url) {
-      throw { status: 400, message: "url missing!" };
-    }
-    const newUrl = await generateShortUrl(url);
 
-    //changed: Added fallback to default origin if process.env.APP_URL is not set
+    if (!url) {
+      const error: any = new Error("url missing!");
+      error.status = 400;
+      throw error;
+    }
+
+    const userId = req.user?.userId || null;
+    const newUrl = await generateShortUrl(url, userId);
+
     const baseUrl = (process.env.APP_URL || "http://localhost:5000").replace(/\/$/, "");
 
     res.status(201).json({
       success: true,
       message: "Short url created!",
-      //changed: Simplified response structure to use generated shortUrl field safely
       shortUrl: `${baseUrl}/redirect/${newUrl.shortUrl}`,
+      createdBy: userId ? "authenticated" : "guest",
     });
-  },
+  }
 );
 
 export const redirectToUrl = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const { id } = req.params;
     const url = await urlModel.findOneAndUpdate({ shortUrl: id }, { $inc: { clicks: 1 } });
+
     if (!url) {
-      throw { status: 404, message: "Short URL not found!" };
+      const error: any = new Error("Short URL not found!");
+      error.status = 404;
+      throw error;
     }
+
     res.redirect(url.fullUrl);
-  },
+  }
 );

@@ -4,6 +4,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { useMutation } from "@tanstack/react-query"; // Replaced useQuery with useMutation since creating a short URL is a POST operation
+import { api } from "../api/api";
 
 export default function Home() {
   const [longUrl, setLongUrl] = useState("");
@@ -27,7 +28,7 @@ export default function Home() {
   const mutation = useMutation({
     //* 1. Definition: mutationFn expects one parameter (urlToShorten)
     mutationFn: async (urlToShorten: string) => {
-      const response = await axios.post("http://localhost:5000/api/create", {
+      const response = await api.post("/create", {
         url: urlToShorten,
       });
       return response.data;
