@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Link2, Sparkles, ExternalLink, Copy, Check, Wand2, ArrowRight } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import axios from "axios";
 import { useMutation } from "@tanstack/react-query"; // Replaced useQuery with useMutation since creating a short URL is a POST operation
 import { api } from "../api/api";
 

@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import urlRouter from "./routes/shortUrl.route.js";
 import authRouter from "./routes/auth.route.js";
+import cookieParser from "cookie-parser";
 
 import { errorHandler } from "./middlewares/error.middleware.js";
 
@@ -13,6 +14,7 @@ app.use(
   }),
 );
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", urlRouter);

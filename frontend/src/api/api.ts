@@ -4,6 +4,7 @@ import { toast } from "react-toastify"; // Optional: if you want global toast no
 export const api = axios.create({
   baseURL: import.meta.env.VITE_SERVER_URL,
   timeout: 10000,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },

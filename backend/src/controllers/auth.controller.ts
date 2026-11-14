@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { User } from "../models/user.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { generateToken } from "../services/jwt.service.js";
+import { AuthenticatedRequest } from "../middlewares/auth.middleware.js";
 
 export const registerUser = asyncHandler(
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -63,7 +64,7 @@ export const loginUser = asyncHandler(
             throw error;
         }
 
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email }).select("+password");
         if (!user) {
             const error: any = new Error("Invalid email or password");
             error.status = 401;
@@ -115,6 +116,40 @@ export const logoutUser = asyncHandler(
 
         res.status(200).json({
             message: "User logged out successfully",
+        });
+    }
+);
+
+export const verify = asyncHandler(
+    async (
+        req: AuthenticatedRequest,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> => {
+        const userId = (req.user as { userId?: string })?.userId;
+
+        if (!userId) {
+            const error: any = new Error("Not authorized");
+            error.status = 401;
+            throw error;
+        }
+
+        const user = await User.findById(userId).select("-password");
+
+        if (!user) {
+            const error: any = new Error("User not found");
+            error.status = 404;
+            throw error;
+        }
+
+        res.status(200).json({
+            success: true,
+            user: {
+                id: user._id,
+                username: user.username,
+                email: user.email,
+                avatar: user.avatar,
+            },
         });
     }
 );
