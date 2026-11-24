@@ -57,9 +57,11 @@ You will find `.env.example` files in both frontend & backend; Just rename them 
 - [x] MongoDB Connection Lifecycle Management
 - [x] URL Shortener Schema & Controller Logic
 - [x] Global Error Handeling in Backend
-- [ ] Frontend Integration & Dashboard (Partially done)
-- [ ] Click Analytics Tracking & Visual Charts
-- [ ] Custom Short Code & Expiration Handling
+- [x] Frontend Integration & Dashboard (Partially done)
+- [x] Custom Short Code
+- [x] Click Analytics Tracking & Visual Charts
+- [ ] Caching
+- [ ] Rate Limiting
 
 ---
 

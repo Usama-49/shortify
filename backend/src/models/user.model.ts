@@ -6,6 +6,7 @@ export interface IUser extends Document {
     email: string;
     password?: string;
     avatar: string;
+    isUserVerified: boolean;
     createdAt: Date;
     updatedAt: Date;
     comparePassword(candidatePassword: string): Promise<boolean>;
@@ -28,7 +29,7 @@ const userSchema = new Schema<IUser>(
         },
         password: {
             type: String,
-            required: [true, "Password is required"],
+            required: false,
             minlength: [6, "Password must be at least 6 characters long"],
             select: false,
         },
@@ -37,8 +38,12 @@ const userSchema = new Schema<IUser>(
             required: false,
             default: function (): string {
                 // Automatically generates a unique, deterministic avatar based on their username or email!
-                return `https://api.dicebear.com/7.x/bottts/svg?seed=${this.username || 'default'}`;
+                return `https://api.dicebear.com/7.x/bottts/svg?seed=${this.username || "default"}`;
             },
+        },
+        isUserVerified: {
+            type: Boolean,
+            default: false,
         },
     },
     {
@@ -47,16 +52,10 @@ const userSchema = new Schema<IUser>(
 );
 
 userSchema.pre<IUser>("save", async function () {
-    if (!this.isModified("password")) return;
+    if (!this.isModified("password") || !this.password) return;
 
-    try {
-        const salt = await bcrypt.genSalt(10);
-        if (this.password) {
-            this.password = await bcrypt.hash(this.password, salt);
-        }
-    } catch (error: any) {
-        throw error;
-    }
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
 });
 
 userSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {

@@ -1,70 +1,96 @@
 import React, { useState } from "react";
-import { Link2, Sparkles, ExternalLink, Copy, Check, Wand2, ArrowRight } from "lucide-react";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { useMutation } from "@tanstack/react-query"; // Replaced useQuery with useMutation since creating a short URL is a POST operation
+import {
+  Link2,
+  Sparkles,
+  ExternalLink,
+  Copy,
+  Check,
+  Wand2,
+  ArrowRight,
+  Tag,
+  Lock,
+} from "lucide-react";
+import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
+import { useMutation } from "@tanstack/react-query";
 import { api } from "../api/api";
+import Loading from "./Loading";
 
-export default function Home() {
+interface HomeProps {
+  loggedIn?: boolean;
+  isAuthLoading?: boolean;
+}
+
+export default function Home({ loggedIn = false, isAuthLoading = false }: HomeProps) {
   const [longUrl, setLongUrl] = useState("");
-  // Removed manual setIsGenerating state since useMutation provides mutation.isPending automatically
+  const [customSlug, setCustomSlug] = useState("");
   const [shortUrl, setShortUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   const MAX_CHARS = 500;
+  const MAX_SLUG_CHARS = 12;
+  const isSlugOverLimit = customSlug.length > MAX_SLUG_CHARS;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
-
     if (val.length > MAX_CHARS) {
       toast.error("Limit reached! Maximum 500 characters allowed.");
       return;
     }
-
     setLongUrl(val);
   };
-  // Added useMutation hook to handle the POST request, loading state, success toast, and error handling cleanly
+
   const mutation = useMutation({
-    //* 1. Definition: mutationFn expects one parameter (urlToShorten)
-    mutationFn: async (urlToShorten: string) => {
-      const response = await api.post("/create", {
-        url: urlToShorten,
-      });
+    mutationFn: async (payload: { url: string; slug?: string }) => {
+      const response = await api.post("/create", payload);
       return response.data;
     },
     onSuccess: (data) => {
       setShortUrl(data.shortUrl);
-      toast.success("URL shortened successfully!");
+      setLongUrl("");
+      setCustomSlug("");
+      setCopied(false);
+      toast.success(data.message || "URL shortened successfully!");
     },
-    onError: () => {
-      toast.error("Failed to generate short URL. Try again!");
+    onError: (error: any) => {
+      const errorMsg = error?.response?.data?.message || "Failed to generate short URL. Try again!";
+      toast.error(errorMsg);
     },
   });
 
-  const handleGenerate = (e: React.FormEvent) => {
+  if (isAuthLoading) {
+    return <Loading />;
+  }
+
+  const handleGenerate = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!longUrl.trim()) {
       toast.warning("Please enter a valid URL first!");
       return;
     }
-    //* 2. Execution: You pass longUrl here
-    mutation.mutate(longUrl);
+
+    if (loggedIn && customSlug.trim().length > MAX_SLUG_CHARS) {
+      toast.error(`Custom alias must be ${MAX_SLUG_CHARS} characters or fewer.`);
+      return;
+    }
+
+    mutation.mutate({
+      url: longUrl.trim(),
+      ...(loggedIn && customSlug.trim() && { slug: customSlug.trim() }),
+    });
   };
 
   const handleCopy = () => {
     if (!shortUrl) return;
     navigator.clipboard.writeText(shortUrl);
     setCopied(true);
-    toast.info("Copied to clipboard!", { autoClose: 2000 }); // overriding autoClose only for copy feedback
+    toast.info("Copied to clipboard!", { autoClose: 2000 });
     setTimeout(() => setCopied(false), 2000);
   };
 
   return (
     <div className="relative min-h-screen w-full bg-zinc-950 text-zinc-100 flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 overflow-hidden font-sans selection:bg-indigo-500 selection:text-white">
-      {/* Configure Global Defaults Here */}
-      <ToastContainer position="top-right" autoClose={3000} theme="dark" />
-
       {/* Background Grid Pattern & Ambient Glows */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f293715_1px,transparent_1px),linear-gradient(to_bottom,#1f293715_1px,transparent_1px)] bg-size-[4rem_4rem] mask-[radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] pointer-events-none" />
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-125 h-75 bg-linear-to-tr from-indigo-600/20 via-violet-600/15 to-pink-500/10 rounded-full blur-[120px] pointer-events-none" />
@@ -90,7 +116,8 @@ export default function Home() {
         </div>
 
         {/* Shortener Form */}
-        <form onSubmit={handleGenerate} className="space-y-5">
+        <form onSubmit={handleGenerate} className="space-y-4">
+          {/* Long URL Input */}
           <div className="relative w-full group">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-indigo-400 transition-colors pointer-events-none flex items-center justify-center">
               <Link2 className="w-5 h-5" />
@@ -114,6 +141,68 @@ export default function Home() {
             </span>
           </div>
 
+          {/* Custom Short URL Section */}
+          <div className="space-y-1.5">
+            {!loggedIn && (
+              <div className="flex items-center gap-1.5 px-1 text-xs text-zinc-400">
+                <Lock className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                <span>
+                  <Link
+                    to="/auth"
+                    className="text-indigo-400 hover:text-indigo-300 font-medium underline underline-offset-2 transition-colors"
+                  >
+                    Login
+                  </Link>{" "}
+                  to create and save custom short URLs
+                </span>
+              </div>
+            )}
+
+            <div className="relative w-full group">
+              <div
+                className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors pointer-events-none flex items-center justify-center ${
+                  isSlugOverLimit
+                    ? "text-rose-400"
+                    : "text-zinc-500 group-focus-within:text-indigo-400"
+                }`}
+              >
+                <Tag className="w-5 h-5" />
+              </div>
+
+              <input
+                type="text"
+                value={customSlug}
+                onChange={(e) => setCustomSlug(e.target.value)}
+                placeholder={
+                  loggedIn
+                    ? "Custom alias (Optional, max 12 chars)... e.g. my-link"
+                    : "Custom alias (Login required)"
+                }
+                disabled={mutation.isPending || !loggedIn}
+                className={`w-full pl-12 pr-16 py-3.5 bg-zinc-950/80 border rounded-2xl text-sm placeholder-zinc-500 focus:outline-none transition-all duration-200 disabled:opacity-45 disabled:cursor-not-allowed shadow-inner ${
+                  isSlugOverLimit
+                    ? "border-rose-500/80 text-rose-400 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/15"
+                    : "border-zinc-800/90 text-zinc-100 focus:border-indigo-500/80 focus:ring-4 focus:ring-indigo-500/10"
+                }`}
+              />
+
+              {loggedIn && (
+                <span
+                  className={`absolute right-4 top-1/2 -translate-y-1/2 text-xs font-mono transition-colors pointer-events-none ${
+                    isSlugOverLimit
+                      ? "text-rose-400 font-bold"
+                      : customSlug.length >= 10
+                        ? "text-amber-400"
+                        : "text-zinc-500"
+                  }`}
+                >
+                  {customSlug.length}/{MAX_SLUG_CHARS}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={mutation.isPending}
