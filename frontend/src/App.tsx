@@ -85,6 +85,8 @@ export default function App() {
             />
 
             <Route path="/auth" element={<AuthPage />} />
+
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
 
