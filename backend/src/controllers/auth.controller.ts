@@ -5,15 +5,21 @@ import { generateToken } from "../services/jwt.service.js";
 import crypto from "node:crypto";
 import { AuthenticatedRequest } from "../middlewares/auth.middleware.js";
 import { getGoogleClient } from "../utils/auth.utils.js";
-import bcrypt from "bcryptjs";
+
+const isProduction = process.env.NODE_ENV === "production";
+
+const authCookieOptions = {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? ("none" as const) : ("lax" as const),
+    path: "/",
+};
 
 export const logoutUser = asyncHandler(
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         res.cookie("token", "none", {
+            ...authCookieOptions,
             expires: new Date(Date.now()),
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict" as const,
         });
 
         res.status(200).json({
@@ -136,9 +142,7 @@ export const googleAuthCallback = async (req: Request, res: Response) => {
         });
 
         res.cookie("token", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
+            ...authCookieOptions,
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
